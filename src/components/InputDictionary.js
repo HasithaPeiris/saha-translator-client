@@ -1,21 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faVolumeUp, faFilePdf } from '@fortawesome/free-solid-svg-icons';
-import { Document, Page, Text, View, StyleSheet, Font, PDFDownloadLink, Image } from '@react-pdf/renderer';
-import image from '../images/logo.png'
-import arrow from '../images/arrow.png'
+import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faVolumeUp, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Font,
+  PDFDownloadLink,
+  Image,
+} from "@react-pdf/renderer";
+import image from "../images/logo.png";
+import arrow from "../images/arrow.png";
 
 // Import a Sinhala font file
-import SinhalaFont from '../fonts/NotoSansSinhala_Condensed-Medium.ttf';
+import SinhalaFont from "../fonts/NotoSansSinhala_Condensed-Medium.ttf";
 
 // Register the Sinhala font
-Font.register({ family: 'SinhalaFont', src: SinhalaFont });
-
+Font.register({ family: "SinhalaFont", src: SinhalaFont });
 
 const PdfDocument = ({ selectedWord, definition }) => (
   <Document>
     <Page size="A4" style={styles.page}>
-
       <Image src={image} style={styles.logo} />
       <View style={styles.section}>
         <Text style={styles.title}>Selected Word:</Text>
@@ -31,7 +38,7 @@ const PdfDocument = ({ selectedWord, definition }) => (
 
 const styles = StyleSheet.create({
   page: {
-    flexDirection: 'column',
+    flexDirection: "column",
     margin: 10,
   },
   section: {
@@ -40,26 +47,26 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: 'red',
+    fontWeight: "bold",
+    color: "red",
     marginBottom: 5,
   },
   content: {
     fontSize: 12,
-    fontFamily: 'SinhalaFont', // Use the registered Sinhala font
+    fontFamily: "SinhalaFont", // Use the registered Sinhala font
   },
   logo: {
-    width: 150, 
-    marginBottom: 5, 
+    width: 150,
+    marginBottom: 5,
   },
 });
 
 export default function Dictionary() {
-  const [content, setContent] = useState(''); // State for the user-entered sentence
-  const [selectedWord, setSelectedWord] = useState('');
-  const [clickedWord, setClickedWord] = useState('');
+  const [content, setContent] = useState(""); // State for the user-entered sentence
+  const [selectedWord, setSelectedWord] = useState("");
+  const [clickedWord, setClickedWord] = useState("");
   const [showSelectButton, setShowSelectButton] = useState(false);
-  const [definition, setDefinition] = useState('');
+  const [definition, setDefinition] = useState("");
 
   useEffect(() => {
     initSpeechSynthesis();
@@ -67,19 +74,19 @@ export default function Dictionary() {
 
   // Function to initialize speech synthesis voices
   function initSpeechSynthesis() {
-    if ('speechSynthesis' in window) {
+    if ("speechSynthesis" in window) {
       window.speechSynthesis.getVoices();
     }
   }
 
   // Function to create <span> elements around each word
   function wrapWordsInSpans() {
-    const words = content.split(' ');
+    const words = content.split(" ");
     return words.map((word, index) => (
       <span
         key={index}
         onClick={() => handleWordClick(word)}
-        className={clickedWord === word ? 'highlight' : ''}
+        className={clickedWord === word ? "highlight" : ""}
       >
         {index === words.length - 1 ? word : `${word} `}
       </span>
@@ -88,27 +95,24 @@ export default function Dictionary() {
 
   // Function to handle word selection on word click
   function handleWordClick(word) {
-
     // Define regular expressions to check for numbers, dates, and email addresses
-  const numberRegex = /^\d+$/; // Matches numbers
-  const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/; // Matches dates in MM/DD/YYYY format
-  const emailRegex = /\S+@\S+\.\S+/; // Matches email addresses
+    const numberRegex = /^\d+$/; // Matches numbers
+    const dateRegex = /^\d{1,2}\/\d{1,2}\/\d{4}$/; // Matches dates in MM/DD/YYYY format
+    const emailRegex = /\S+@\S+\.\S+/; // Matches email addresses
 
-  // Check if the selected word is a number, date, or email address
-  if (numberRegex.test(word)) {
-    alert("Numbers are not valid words.");
-  } else if (dateRegex.test(word)) {
-    alert("Dates are not valid words.");
-  } else if (emailRegex.test(word)) {
-    alert("Email addresses are not valid words.");
-  } else {
-
-    // If the word is a valid word, update the state
-    setClickedWord(word);
-    setShowSelectButton(true);
-    setDefinition('');
-  }
-  
+    // Check if the selected word is a number, date, or email address
+    if (numberRegex.test(word)) {
+      alert("Numbers are not valid words.");
+    } else if (dateRegex.test(word)) {
+      alert("Dates are not valid words.");
+    } else if (emailRegex.test(word)) {
+      alert("Email addresses are not valid words.");
+    } else {
+      // If the word is a valid word, update the state
+      setClickedWord(word);
+      setShowSelectButton(true);
+      setDefinition("");
+    }
   }
 
   async function selectWord() {
@@ -117,10 +121,12 @@ export default function Dictionary() {
     setSelectedWord(clickedWord);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/words/${lowercaseClickedWord}`);
+      const response = await fetch(
+        `https://saha-translator-fddb8f132901.herokuapp.com/api/words/${lowercaseClickedWord}`
+      );
 
       if (!response.ok) {
-        throw new Error('Word not found');
+        throw new Error("Word not found");
       }
 
       const data = await response.json();
@@ -130,17 +136,16 @@ export default function Dictionary() {
         setDefinition(
           <>
             <b>Sinhala Meaning:</b> {data.sinhala}
-
             <br />
             <b>Part of Speech:</b> {data.pos}
           </>
         );
       } else {
-        throw new Error('Definition not found');
+        throw new Error("Definition not found");
       }
     } catch (error) {
       console.error(error.message);
-      setDefinition('Definition not found');
+      setDefinition("Definition not found");
     } finally {
       setShowSelectButton(false);
     }
@@ -148,29 +153,27 @@ export default function Dictionary() {
 
   // Function to speak the selected word
   function speakSelectedWord() {
-    if ('speechSynthesis' in window) {
+    if ("speechSynthesis" in window) {
       const utterance = new SpeechSynthesisUtterance(selectedWord);
       window.speechSynthesis.speak(utterance);
     }
   }
 
-
   return (
     <div className="relative ">
-
       <div className="relative  bg-opacity-75 mt-12">
         <div className="px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-20">
           <div className="flex flex-col items-center justify-between xl:flex-row">
             <div className="w-full max-w-xl mb-12 xl:mb-0 xl:pr-16 xl:w-7/12">
               <h2 className="max-w-lg mb-6 font-sans text-4xl font-bold tracking-tight  sm:text-4xl sm:leading-none">
                 Enter Sentence for <br className="hidden md:block" />
-                Get Definition from{' '}
+                Get Definition from{" "}
                 <span className="text-blue-400">Dictionary</span>
               </h2>
               <p className="max-w-xl mb-4 text-base text-gray-600 md:text-lg">
-                Unlock the Power of Words, Explore Languages,
-                and Enhance Your Vocabulary with Your Ultimate Language Companion.
-                Type any sentence in the text box and select words and find definitions.
+                Unlock the Power of Words, Explore Languages, and Enhance Your
+                Vocabulary with Your Ultimate Language Companion. Type any
+                sentence in the text box and select words and find definitions.
               </p>
               <a
                 href="/translator"
@@ -255,7 +258,15 @@ export default function Dictionary() {
                   )}
 
                   {selectedWord && (
-                    <PDFDownloadLink document={<PdfDocument selectedWord={selectedWord} definition={definition} />} fileName="selected_word.pdf">
+                    <PDFDownloadLink
+                      document={
+                        <PdfDocument
+                          selectedWord={selectedWord}
+                          definition={definition}
+                        />
+                      }
+                      fileName="selected_word.pdf"
+                    >
                       {() => (
                         <button
                           id="downloadPdfButton"
